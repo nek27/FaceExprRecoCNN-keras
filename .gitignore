@@ -4,3 +4,5 @@ __pycache__/
 __dataset__/
 *.model
 *.pickle
+fer2013/
+fer2013.tar
