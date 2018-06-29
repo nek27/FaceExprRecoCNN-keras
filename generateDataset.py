@@ -34,7 +34,13 @@ if __name__ == '__main__':
 		img_count[emotion] = 0
 	
 	f = open('fer2013/fer2013.csv')
+	# Skip leading info line
 	f.readline()
+	
+	# Create dataset dir if doesnt exists
+	if(not os.path.exists('dataset')):
+		os.mkdir('dataset')
+	
 	for line in f:
 		# Process line
 		emotion, BWshade, usage = process_line(line, emotion_map)
