@@ -111,8 +111,12 @@ if __name__ == '__main__':
 	from CNN.buildModel import CNN
 	
 	# Initialize constants
-	EPOCHS = 75
+	EPOCHS = 1
 	INIT_ALPHA = 0.001
+	L2_RATE = 0.01
+	N = 3
+	M = 4
+	DROPOUT_RATE = 0.25
 	BATCH_SIZE = 32	# LOOK FOR THIS
 	IMAGE_DIMS = (48, 48, 1)
 	
@@ -121,11 +125,15 @@ if __name__ == '__main__':
 	
 	# Initialize the model
 	print("[INFO] compiling model...")
-	model = CNN.build(
+	model = CNN.buildDeeperCNN(
 		width=IMAGE_DIMS[1],
 		height=IMAGE_DIMS[0],
 		depth=IMAGE_DIMS[2],
-		classes=len(lb.classes_)
+		classes=len(lb.classes_),
+		n = N,
+		m = M,
+		l2rate = L2_RATE,
+		dropout_rate = DROPOUT_RATE
 	)
 	# Optimizer
 	opt = Adam(lr=INIT_ALPHA, decay=INIT_ALPHA / EPOCHS)

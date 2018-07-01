@@ -7,6 +7,7 @@ from keras.layers.core import Activation
 from keras.layers.core import Flatten
 from keras.layers.core import Dropout
 from keras.layers.core import Dense
+from keras.regularizers import l2
 from keras import backend as K
 
 class CNN(object):
@@ -83,7 +84,7 @@ class CNN(object):
 		
 		
 	@staticmethod
-	def buildDeeperCNN(width, height, depth, classes):
+	def buildDeeperCNN(width, height, depth, classes, n, m, l2rate, dropout_rate):
 		
 		# Initialize model
 		model = Sequential()
@@ -97,47 +98,108 @@ class CNN(object):
 			chan_idx = -1
 			
 		# First block
-		model.add(Conv2D(32, (3, 3), padding = 'same', input_shape = input_shape, strides = 1, kernel_initializer='he_normal', bias_initializer='he_normal'))
+		model.add(Conv2D(32, (3, 3), input_shape = input_shape,
+						 padding = 'same', strides = 1, 
+						 kernel_initializer='he_normal', 
+						 bias_initializer='he_normal'),
+						 kernel_regularizer = l2(l2rate),
+						 bias_regularizer = l2(l2rate))
+						 
 		model.add(BatchNormalization(axis = chan_idx))
-		model.add(Activation('relu'))
+		model.add(Activation('relu', kernel_initializer='he_normal', 
+						 bias_initializer='he_normal'),
+						 kernel_regularizer = l2(l2rate),
+						 bias_regularizer = le(l2rate))
 		
 		# Second block
-		for n in range(0, 3):
-			model.add(Conv2D(32, (3, 3), padding = 'same', strides = 1, kernel_initializer='he_normal', bias_initializer='he_normal'))
+		for n in range(0, n):
+			model.add(Conv2D(32, (3, 3), padding = 'same', strides = 1,
+							 kernel_initializer='he_normal',
+							 bias_initializer='he_normal',
+							 kernel_regularizer = l2(l2rate),
+							 bias_regularizer = l2(l2rate)))
+							
 			model.add(BatchNormalization(axis = chan_idx))
-			model.add(Activation('relu'))
-			model.add(Conv2D(32, (3, 3), padding = 'same', strides = 1))
+			model.add(Activation('relu', kernel_initializer='he_normal', 
+						 bias_initializer='he_normal'),
+						 kernel_regularizer = l2(l2rate),
+						 bias_regularizer = le(l2rate))
+			model.add(Conv2D(32, (3, 3), padding = 'same', strides = 1,
+							 kernel_initializer='he_normal',
+							 bias_initializer='he_normal',
+							 kernel_regularizer = l2(l2rate),
+							 bias_regularizer = l2(l2rate)))
+							 
 			model.add(BatchNormalization(axis = chan_idx))
-			model.add(Activation('relu'))
+			model.add(Activation('relu', kernel_initializer='he_normal', 
+						 bias_initializer='he_normal'),
+						 kernel_regularizer = l2(l2rate),
+						 bias_regularizer = le(l2rate))
 			model.add(MaxPooling2D(pool_size = (2, 2), strides = 2))
-			model.add(Dropout(0.25))
+			model.add(Dropout(dropout_rate))
 			
 		# Third block
-		for n in range(0, 3):
-			model.add(Conv2D(64, (3, 3), padding = 'same', strides = 1, kernel_initializer='he_normal', bias_initializer='he_normal'))
+		for n in range(0, m):
+			model.add(Conv2D(64, (3, 3), padding = 'same', strides = 1,
+							 kernel_initializer='he_normal',
+							 bias_initializer='he_normal',
+							 kernel_regularizer = l2(l2rate),
+							 bias_regularizer = l2(l2rate)))
+							 
 			model.add(BatchNormalization(axis = chan_idx))
-			model.add(Activation('relu'))
-			model.add(Conv2D(64, (3, 3), padding = 'same', strides = 1))
+			model.add(Activation('relu', kernel_initializer='he_normal', 
+						 bias_initializer='he_normal'),
+						 kernel_regularizer = l2(l2rate),
+						 bias_regularizer = le(l2rate))
+			model.add(Conv2D(64, (3, 3), padding = 'same', strides = 1,
+							 kernel_initializer='he_normal',
+							 bias_initializer='he_normal',
+							 kernel_regularizer = l2(l2rate),
+							 bias_regularizer = l2(l2rate)))
 			model.add(BatchNormalization(axis = chan_idx))
-			model.add(Activation('relu'))
+			model.add(Activation('relu', kernel_initializer='he_normal', 
+						 bias_initializer='he_normal'), 
+						 kernel_regularizer = l2(l2rate),
+						 bias_regularizer = le(l2rate))
 			model.add(MaxPooling2D(pool_size = (2, 2), strides = 2))
-			model.add(Dropout(0.25))
+			model.add(Dropout(dropout_rate))
 			
 		# Fourth block
-		model.add(Dense(512, kernel_initializer='he_normal', bias_initializer='he_normal'))
+		model.add(Dense(512, kernel_initializer='he_normal',
+						bias_initializer='he_normal',
+						kernel_regularizer = l2(l2rate),
+						bias_regularizer = le(l2rate)))
+						
 		model.add(BatchNormalization(axis = chan_idx))
-		model.add(Activation('relu'))
-		model.add(Dropout(0.25))
+		model.add(Activation('relu', kernel_initializer='he_normal', 
+						 bias_initializer='he_normal'), 
+						 kernel_regularizer = l2(l2rate),
+						 bias_regularizer = le(l2rate))
+		model.add(Dropout(dropout_rate))
 		
-		model.add(Dense(256))
+		model.add(Dense(256, kernel_initializer='he_normal',
+						bias_initializer='he_normal',
+						kernel_regularizer = l2(l2rate),
+						bias_regularizer = le(l2rate)))
 		model.add(BatchNormalization(axis = chan_idx))
-		model.add(Activation('relu'))
-		model.add(Dropout(0.25))
+		model.add(Activation('relu', kernel_initializer='he_normal', 
+						 bias_initializer='he_normal'),
+						 kernel_regularizer = l2(l2rate),
+						 bias_regularizer = le(l2rate))
+		model.add(Dropout(dropout_rate))
 		
-		model.add(Dense(128))
+		model.add(Dense(128, kernel_initializer='he_normal',
+						bias_initializer='he_normal',
+						kernel_regularizer = l2(l2rate),
+						bias_regularizer = le(l2rate)))
 		model.add(BatchNormalization(axis = chan_idx))
-		model.add(Activation('relu'))
-		model.add(Dropout(0.25))
+		model.add(Activation('relu', kernel_initializer='he_normal', 
+						 bias_initializer='he_normal'),
+						 kernel_regularizer = l2(l2rate),
+						 bias_regularizer = le(l2rate))
+		model.add(Dropout(dropout_rate))
 		
-		#model.add(Dense(classes))
-		model.add(Activation("softmax"))
+		model.add(Activation("softmax", kernel_initializer='he_normal', 
+						 bias_initializer='he_normal'),
+						 kernel_regularizer = l2(l2rate),
+						 bias_regularizer = le(l2rate))
