@@ -4,6 +4,9 @@ matplotlib.use("Agg")
  
 def print_green(message):
 	print(Fore.GREEN + str(message) + Style.RESET_ALL)
+	
+def print_red(message):
+	print(Fore.RED + str(message) + Style.RESET_ALL)
 
 # Argument Parser
 def parse_arguments():
@@ -20,22 +23,33 @@ def parse_arguments():
 	
 	return args
 	
-def process_dataset(dataset_path, IMAGE_DIMS):
-	data = []
-	labels = []
-	
-	# Randomly shuffle the image paths
-	print("[INFO] loading images...")
+def get_shuffled_paths(dataset_path):
 	image_paths = sorted(list(paths.list_images(dataset_path)))
 	random.seed(42)
 	random.shuffle(image_paths)
 	
+def get_imread_flag(IMAGE_DIMS):
+	imread_flag = None
 	if(IMAGE_DIMS[2] == 1):
 		imread_flag = cv2.IMREAD_GRAYSCALE
 	elif(IMAGE_DIMS[2] == 3):
 		imread_flag = cv2.IMREAD_COLOR
 	else:
-		print_red('What are you trying to do? Only images with 1 or 2 channels allowed')
+		print_red('What are you trying to do? Only images with 1 or 3 channels allowed')
+		exit()
+		
+	return imread_flag
+	
+def process_dataset(dataset_path, IMAGE_DIMS):
+	data = []
+	labels = []
+	
+	print("[INFO] loading images...")
+	# Randomly shuffle the image paths
+	image_paths = get_shuffled_paths(dataset_path)
+	
+	# Set correct flag for colored or grayscale images
+	imread_flag = get_imread_flag(IMAGE_DIMS)
 	
 	# Load images into memmory
 	for image_path in image_paths:
@@ -49,9 +63,11 @@ def process_dataset(dataset_path, IMAGE_DIMS):
 		label = image_path.split(os.path.sep)[-2]
 		labels.append(label)
 		
-	# Normalize data with z-score algorithm
+	# Normalize data with z-score
+	print("[INFO] normalizing images...")
 	data = get_normalized(data)
 	
+	# Get label list as numpy array
 	labels = np.array(labels)
 	print("[INFO] data size: {:.2f}MB".format(data.nbytes / (1024 * 1000.0)))
 	
@@ -90,19 +106,13 @@ def save_loss_and_accuracy_plot(EPOCHS, H, plot_path):
 	plt.savefig(plot_path)
 
 def get_normalized(data):
-	mean = np.mean(data, axis=0, dtype=np.float128)
-	data = data - np.mean(data, axis=0, dtype=np.float128)
-	data = data / 255.0
-	
-	print(data)
-	print(data.shape)
-	cv2.imwrite('dataset_mean.png', mean.astype(np.uint8).reshape( 48, 48 ))
-	exit()
+	mean = np.mean(data, axis=0, dtype='float')
+	stddev = np.std(data, axis=0, dtype='float')
+	data = data - mean
+	data = data / stddev
+	#data = data / stddev maybe use this???
 
-
-def get_data_mean(data):
-	
-	return np.mean(data, axis=0, dtype=np.float128)
+	return data
 	
 if __name__ == '__main__':
 	import argparse	
