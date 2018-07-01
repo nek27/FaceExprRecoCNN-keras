@@ -18,11 +18,11 @@ def parse_arguments():
 	return args
 	
 def process_image(img_path):
-	image = cv2.imread(img_path)
+	image = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
 	output = image.copy()
 	
 	# Process the image for classification
-	image = cv2.resize(image, (96, 96))
+	image = cv2.resize(image, (48, 48))
 	image = image.astype("float") / 255.0
 	image = img_to_array(image)
 	image = np.expand_dims(image, axis=0)

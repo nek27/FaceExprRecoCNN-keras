@@ -6,3 +6,6 @@ __dataset__/
 *.pickle
 fer2013/
 fer2013.tar
+*.lb
+asd/
+papers/

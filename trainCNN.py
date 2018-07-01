@@ -111,9 +111,9 @@ if __name__ == '__main__':
 	from CNN.buildModel import CNN
 	
 	# Initialize constants
-	EPOCHS = 20
+	EPOCHS = 75
 	INIT_ALPHA = 0.001
-	BATCH_SIZE = 32
+	BATCH_SIZE = 32	# LOOK FOR THIS
 	IMAGE_DIMS = (48, 48, 1)
 	
 	# Process images for training
