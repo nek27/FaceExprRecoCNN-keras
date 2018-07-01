@@ -49,8 +49,9 @@ def process_dataset(dataset_path, IMAGE_DIMS):
 		label = image_path.split(os.path.sep)[-2]
 		labels.append(label)
 		
-	# Normalize pixel data and convert to numpy arrays
-	data = np.array(data, dtype="float") / 255.0
+	# Normalize data with z-score algorithm
+	data = get_normalized(data)
+	
 	labels = np.array(labels)
 	print("[INFO] data size: {:.2f}MB".format(data.nbytes / (1024 * 1000.0)))
 	
@@ -87,6 +88,21 @@ def save_loss_and_accuracy_plot(EPOCHS, H, plot_path):
 	plt.ylabel("Loss/Accuracy")
 	plt.legend(loc="upper left")
 	plt.savefig(plot_path)
+
+def get_normalized(data):
+	mean = np.mean(data, axis=0, dtype=np.float128)
+	data = data - np.mean(data, axis=0, dtype=np.float128)
+	data = data / 255.0
+	
+	print(data)
+	print(data.shape)
+	cv2.imwrite('dataset_mean.png', mean.astype(np.uint8).reshape( 48, 48 ))
+	exit()
+
+
+def get_data_mean(data):
+	
+	return np.mean(data, axis=0, dtype=np.float128)
 	
 if __name__ == '__main__':
 	import argparse	
