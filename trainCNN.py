@@ -111,7 +111,7 @@ if __name__ == '__main__':
 	from CNN.buildModel import CNN
 	
 	# Initialize constants
-	EPOCHS = 1
+	EPOCHS = 10
 	INIT_ALPHA = 0.001
 	L2_RATE = 0.01
 	N = 3
