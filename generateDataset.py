@@ -41,9 +41,14 @@ if __name__ == '__main__':
 	if(not os.path.exists('dataset')):
 		os.mkdir('dataset')
 	
+	usages = {}
 	for line in f:
 		# Process line
 		emotion, BWshade, usage = process_line(line, emotion_map)
+		if usage not in usages:
+			usages[usage] = 1
+		else:
+			usages[usage] += 1
 		
 		# Turn pixel data into image matrix
 		image = BWshade.reshape( (IMG_HEIGHT, IMG_WIDTH) )
@@ -57,5 +62,6 @@ if __name__ == '__main__':
 		
 		# Update img_count
 		img_count[emotion] += 1
+
 
 		

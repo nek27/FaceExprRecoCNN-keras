@@ -26,7 +26,9 @@ def parse_arguments():
 def get_shuffled_paths(dataset_path):
 	image_paths = sorted(list(paths.list_images(dataset_path)))
 	random.seed(42)
-	random.shuffle(image_paths)
+	print(random.shuffle(image_paths))
+	
+	return image_paths
 	
 def get_imread_flag(IMAGE_DIMS):
 	imread_flag = None
@@ -78,17 +80,21 @@ def process_dataset(dataset_path, IMAGE_DIMS):
 	# Partition dataset into training and testing (80%, 20%)
 	trainX, testX, trainY, testY = train_test_split(data, labels, test_size=0.2, random_state=42)
 	
-	# Construct image generation for augmenting the dataset
+	# Construct object for data augmentation
 	aug = ImageDataGenerator(
-		rotation_range=25,
-		width_shift_range=0.1,
-		height_shift_range=0.1,
-		shear_range=0.2,
-		zoom_range=0.2,
-		horizontal_flip=True,
-		fill_mode="nearest"
+		
+		# z-score Normalization
+		featurewise_center = True,
+		featurewise_std_normalization = True,
+		
+		# Image transformation
+		horizontal_flip = True,
+		vertical_flip = True,
+		width_shift_range = 0.2,
+		height_shift_range = 0.2,
 	)
-	
+	aug.fit(trainX)
+
 	return trainX, testX, trainY, testY, aug, lb
 
 def save_loss_and_accuracy_plot(EPOCHS, H, plot_path):
@@ -137,7 +143,7 @@ if __name__ == '__main__':
 	from CNN.buildModel import CNN
 	
 	# Initialize constants
-	EPOCHS = 10
+	EPOCHS = 1
 	INIT_ALPHA = 0.001
 	L2_RATE = 0.01
 	N = 3
