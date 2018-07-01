@@ -86,7 +86,6 @@ class CNN(object):
 		
 	@staticmethod
 	def buildDeeperCNN(width, height, depth, classes, n, m, l2rate, dropout_rate):
-		
 		# Initialize model
 		model = Sequential()
 		
@@ -147,7 +146,8 @@ class CNN(object):
 			model.add(BatchNormalization(axis = chan_idx))
 			model.add(Activation('relu'))
 			
-			model.add(MaxPooling2D(pool_size = (2, 2), strides = 2))
+			#model.add(MaxPooling2D(pool_size = (2, 2), strides = 2))
+			model.add(MaxPooling2D(pool_size = (2, 2), strides = 1))
 			model.add(Dropout(dropout_rate))
 			
 		# Fourth block
@@ -175,7 +175,6 @@ class CNN(object):
 		model.add(Activation('relu'))
 		model.add(Dropout(dropout_rate))
 		
-		model.add(Activation("softmax", kernel_initializer='he_normal', 
-						 bias_initializer='he_normal',
-						 kernel_regularizer = l2(l2rate),
-						 bias_regularizer = l2(l2rate)))
+		model.add(Activation("softmax"))
+		
+		return model
