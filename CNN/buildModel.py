@@ -151,6 +151,7 @@ class CNN(object):
 			model.add(Dropout(dropout_rate))
 			
 		# Fourth block
+		model.add(Flatten())
 		model.add(Dense(512, kernel_initializer='he_normal',
 						bias_initializer='he_normal',
 						kernel_regularizer = l2(l2rate),
@@ -175,6 +176,7 @@ class CNN(object):
 		model.add(Activation('relu'))
 		model.add(Dropout(dropout_rate))
 		
+		model.add(Dense(classes))
 		model.add(Activation("softmax"))
 		
 		return model
