@@ -166,7 +166,7 @@ if __name__ == '__main__':
 	N = 3
 	M = 4
 	DROPOUT_RATE = 0.25
-	BATCH_SIZE = 32	# LOOK FOR THIS
+	BATCH_SIZE = 32 
 	IMAGE_DIMS = (48, 48, 1)
 	
 	# Process images for training
