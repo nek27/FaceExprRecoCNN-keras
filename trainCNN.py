@@ -11,8 +11,10 @@ def print_red(message):
 # Argument Parser
 def parse_arguments():
 	ap = argparse.ArgumentParser()
-	ap.add_argument("-d", "--dataset", required=True,
-		help="path to input dataset (i.e., directory of images)")
+	ap.add_argument("-td", "--training_dataset", required=True,
+		help="path to training dataset (i.e., directory of images)")
+	ap.add_argument("-vd", "--validation_dataset", required=True,
+		help="path to validation dataset (i.e., directory of images)")
 	ap.add_argument("-m", "--model", required=True,
 		help="path to output model")
 	ap.add_argument("-l", "--labelbin", required=True,
@@ -23,12 +25,14 @@ def parse_arguments():
 	
 	return args
 	
-def get_shuffled_paths(dataset_path):
-	image_paths = sorted(list(paths.list_images(dataset_path)))
+def get_shuffled_paths(training_dataset_path, validation_dataset_path):
+	training_image_paths = sorted(list(paths.list_images(training_dataset_path)))
+	validation_image_paths = sorted(list(paths.list_images(validation_dataset_path)))
 	random.seed(42)
-	print(random.shuffle(image_paths))
+	random.shuffle(training_image_paths)
+	random.shuffle(validation_image_paths)
 	
-	return image_paths
+	return training_image_paths, validation_image_paths
 	
 def get_imread_flag(IMAGE_DIMS):
 	imread_flag = None
@@ -42,47 +46,61 @@ def get_imread_flag(IMAGE_DIMS):
 		
 	return imread_flag
 	
-def process_dataset(dataset_path, IMAGE_DIMS):
-	data = []
-	labels = []
+	
+def process_dataset(training_dataset_path, validation_dataset_path, IMAGE_DIMS):
+	training_inp = []
+	validation_inp = []
+	training_labels = []
+	validation_labels = []
 	
 	print("[INFO] loading images...")
 	# Randomly shuffle the image paths
-	image_paths = get_shuffled_paths(dataset_path)
+	t_image_paths, v_image_paths = get_shuffled_paths(training_dataset_path, validation_dataset_path)
 	
 	# Set correct flag for colored or grayscale images
 	imread_flag = get_imread_flag(IMAGE_DIMS)
 	
-	# Load images into memmory
-	for image_path in image_paths:
+	# Load training images into memory
+	for t_image_path in t_image_paths:
 		# Read image, resize it to fit the CNN input size and convert to array
-		image = cv2.imread(image_path, imread_flag)
+		image = cv2.imread(t_image_path, imread_flag)
 		image = cv2.resize(image, (IMAGE_DIMS[1], IMAGE_DIMS[0]))
 		image = img_to_array(image)
-		data.append(image)
+		training_inp.append(image)
 
 		# Extrat the image label from the path and update label list
-		label = image_path.split(os.path.sep)[-2]
-		labels.append(label)
+		label = t_image_path.split(os.path.sep)[-2]
+		training_labels.append(label)
+	training_inp = np.array(training_inp)
 		
-	# Normalize data with z-score
-	print("[INFO] normalizing images...")
-	data = get_normalized(data)
+	# Load validation images into memory
+	for v_image_path in v_image_paths:
+		# Read image, resize it to fit the CNN input size and convert to array
+		image = cv2.imread(v_image_path, imread_flag)
+		image = cv2.resize(image, (IMAGE_DIMS[1], IMAGE_DIMS[0]))
+		image = img_to_array(image)
+		validation_inp.append(image)
+
+		# Extrat the image label from the path and update label list
+		label = v_image_path.split(os.path.sep)[-2]
+		validation_labels.append(label)
+	validation_inp = np.array(validation_inp)
 	
-	# Get label list as numpy array
-	labels = np.array(labels)
-	print("[INFO] data size: {:.2f}MB".format(data.nbytes / (1024 * 1000.0)))
+	# Get label lists as numpy arrays
+	training_labels = np.array(training_labels)
+	validation_labels = np.array(validation_labels)
 	
-	# Create output matrix
+	# Printo info about training and validation data
+	print("[INFO] training data size: {:.2f}MB".format(training_inp.nbytes / (1024 * 1000.0)))
+	print("[INFO] validation data size: {:.2f}MB".format(validation_inp.nbytes / (1024 * 1000.0)))
+	
+	# Create output matrices
 	lb = LabelBinarizer()
-	labels = lb.fit_transform(labels)
-	
-	# Partition dataset into training and testing (80%, 20%)
-	trainX, testX, trainY, testY = train_test_split(data, labels, test_size=0.2, random_state=42)
+	training_out = lb.fit_transform(training_labels)
+	validation_out = lb.fit_transform(validation_labels)
 	
 	# Construct object for data augmentation
 	aug = ImageDataGenerator(
-		
 		# z-score Normalization
 		featurewise_center = True,
 		featurewise_std_normalization = True,
@@ -93,9 +111,9 @@ def process_dataset(dataset_path, IMAGE_DIMS):
 		width_shift_range = 0.2,
 		height_shift_range = 0.2,
 	)
-	aug.fit(trainX)
+	aug.fit(training_inp)
 
-	return trainX, testX, trainY, testY, aug, lb
+	return training_inp, validation_inp, training_out, validation_out, aug, lb
 
 def save_loss_and_accuracy_plot(EPOCHS, H, plot_path):
 	plt.style.use("ggplot")
@@ -116,7 +134,6 @@ def get_normalized(data):
 	stddev = np.std(data, axis=0, dtype='float')
 	data = data - mean
 	data = data / stddev
-	#data = data / stddev maybe use this???
 
 	return data
 	
@@ -153,7 +170,7 @@ if __name__ == '__main__':
 	IMAGE_DIMS = (48, 48, 1)
 	
 	# Process images for training
-	trainX, testX, trainY, testY, aug, lb = process_dataset(args.dataset, IMAGE_DIMS)
+	trainX, testX, trainY, testY, aug, lb = process_dataset(args.training_dataset, args.validation_dataset, IMAGE_DIMS)
 	
 	# Initialize the model
 	print("[INFO] compiling model...")

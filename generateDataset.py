@@ -12,7 +12,7 @@ def print_red(message):
 	
 def process_line(line, emotion_map):
 	line = line.split(',')
-	return emotion_map[line[0]], np.array(line[1].split(), dtype = np.uint8), line[2]
+	return emotion_map[line[0]], np.array(line[1].split(), dtype = np.uint8), line[2][:-1]
 
 if __name__ == '__main__':
 	
@@ -41,24 +41,22 @@ if __name__ == '__main__':
 	if(not os.path.exists('dataset')):
 		os.mkdir('dataset')
 	
-	usages = {}
 	for line in f:
 		# Process line
 		emotion, BWshade, usage = process_line(line, emotion_map)
-		if usage not in usages:
-			usages[usage] = 1
-		else:
-			usages[usage] += 1
 		
 		# Turn pixel data into image matrix
 		image = BWshade.reshape( (IMG_HEIGHT, IMG_WIDTH) )
 		
-		# Create dir for this emotion if it doesnt exist
-		if(not os.path.exists('dataset/{}'.format(emotion))):
-			os.mkdir('dataset/{}'.format(emotion))
+		# Create dirs for the stablished structure if they dont exist
+		if(not os.path.exists('dataset/{}'.format(usage))):
+			os.mkdir('dataset/{}'.format(usage))
+		
+		if(not os.path.exists('dataset/{}/{}'.format(usage, emotion))):
+			os.mkdir('dataset/{}/{}'.format(usage, emotion))
 		
 		# Store image
-		cv2.imwrite('dataset/{}/{}{:05d}.png'.format(emotion, emotion, img_count[emotion]), image)
+		cv2.imwrite('dataset/{}/{}/{}{:05d}.png'.format(usage, emotion, emotion, img_count[emotion]), image)
 		
 		# Update img_count
 		img_count[emotion] += 1
