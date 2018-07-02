@@ -172,6 +172,9 @@ if __name__ == '__main__':
 	# Process images for training
 	trainX, testX, trainY, testY, aug, lb = process_dataset(args.training_dataset, args.validation_dataset, IMAGE_DIMS)
 	
+	# Normalize validation data with z-score
+	testX = (testX - aug.mean)/aug.std
+	
 	# Initialize the model
 	print("[INFO] compiling model...")
 	model = CNN.buildDeeperCNN(
