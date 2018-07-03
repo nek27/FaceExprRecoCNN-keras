@@ -113,13 +113,13 @@ def save_results_to_disk(model, lb, H, args):
 		buff = 'EPOCH {}\n'.format(i)
 		for key in H.history.keys():
 			buff += '{}: {} '.format(key, H.history[key][i])
-		buff ++'\n'
+		buff +='\n'
 	f= open("{}/training_log.txt".format(folder_st), 'w')
 	f.write(buff)
 	f.close()
 	
 	# Store log in a .pickle for later use
-	f = open('{}/training_log_dict.pickle', 'wb')
+	f = open('{}/training_log_dict.pickle'.format(folder_st), 'wb')
 	pickle.dump(H.history, f)
 	f.close()
 		
