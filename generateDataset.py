@@ -1,14 +1,6 @@
-from colorama import Fore, Style
-
 import numpy as np
 import cv2
 import os
-
-def print_green(message):
-	print(Fore.GREEN + str(message) + Style.RESET_ALL)
-	
-def print_red(message):
-	print(Fore.RED + str(message) + Style.RESET_ALL)
 	
 def process_line(line, emotion_map):
 	line = line.split(',')
