@@ -109,8 +109,9 @@ def save_results_to_disk(model, lb, H, args):
 	save_loss_and_accuracy_plot(args.epochs, H, '{}/loss_acc_plot.png'.format(folder_st))
 	
 	# Store log on a txt
+	buff = ''
 	for i in range(args.epochs):
-		buff = 'EPOCH {}\n'.format(i)
+		buff += 'EPOCH {}\n'.format(i)
 		for key in H.history.keys():
 			buff += '{}: {} '.format(key, H.history[key][i])
 		buff +='\n'
