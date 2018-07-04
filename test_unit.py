@@ -1,28 +1,6 @@
-from trainCNN import *
 import os
 
 if __name__ == '__main__':
-	
-	"""
-	epochs = 10
-	
-	alpha_i = 1.2
-	alpha_e = 1.8
-	
-	l2r_i = 1.2
-	l2r_e = 2
-	
-	do_i = 0.05
-	do_e = 0.35
-	
-	batchsize = 32
-	
-	sizeb1_i = 2
-	sizeb1_e = 4
-	
-	sizeb2_i = 2
-	sizeb2_e = 4
-	"""
 	
 	# Tune alpha
 	os.system('python trainCNN.py -e 10 -a 1.3 -l2 1.25 -d 0.10 -bs 32 -sb1 3 -sb2 3')
