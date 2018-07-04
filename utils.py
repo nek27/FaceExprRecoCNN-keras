@@ -89,10 +89,11 @@ def save_loss_and_accuracy_plot(EPOCHS, H, plot_path):
 	plt.savefig(plot_path)
 
 # Saves all the results in a folder under the folder it is executed in	
-def save_results_to_disk(model, lb, H, args):
+def save_results_to_disk(model, lb, H, epochs, alpha, l2r, dropout,
+						 batchsize, sizeb1, sizeb2):
+				 
 	folder_st = 'res_{}e_{}a_{}l2_{}d_{}bs_{}sb1_{}sb2'.format(
-		args.epochs, args.alpha, args.l2regrate, args.dropout,
-		args.batchsize, args.sizeblock1, args.sizeblock2)
+		epochs, alpha, l2r, dropout, batchsize, sizeb1, sizeb2)
 
 	if(not os.path.exists(folder_st)):
 		os.mkdir(folder_st)
@@ -106,10 +107,10 @@ def save_results_to_disk(model, lb, H, args):
 	f.close()
 	
 	# Generate training loss and accuracy plot
-	save_loss_and_accuracy_plot(args.epochs, H, '{}/loss_acc_plot.png'.format(folder_st))
+	save_loss_and_accuracy_plot(epochs, H, '{}/loss_acc_plot.png'.format(folder_st))
 	
 	# Store log on a txt
-	for i in range(args.epochs):
+	for i in range(epochs):
 		buff = 'EPOCH {}\n'.format(i)
 		for key in H.history.keys():
 			buff += '{}: {} '.format(key, H.history[key][i])

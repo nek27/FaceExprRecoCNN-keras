@@ -91,15 +91,21 @@ def process_dataset(training_dataset_path, validation_dataset_path, IMAGE_DIMS):
 
 	return training_inp, validation_inp, training_out, validation_out, aug, lb
 
-def trainCNN(args, IMAGE_DIMS = (48, 48, 1)):
-	# Process images for training
+def load_dataset(IMAGE_DIMS = (48, 48, 1)):
+	
 	if(args.short_test):
 		trainX, testX, trainY, testY, aug, lb = process_dataset('dataset/PublicTest', 'dataset/PublicTest', IMAGE_DIMS)
 	else:
 		trainX, testX, trainY, testY, aug, lb = process_dataset('dataset/Training', 'dataset/PublicTest', IMAGE_DIMS)
-	
+		
 	# Normalize validation data with z-score
 	testX = (testX - aug.mean)/aug.std
+	
+	return trainX, testX, trainY, testY, aug, lb
+
+def trainCNN(trainX, testX, trainY, testY, aug, lb, IMAGE_DIMS = (48, 48, 1),
+			 epochs = 10, alpha = 0.1, l2r = 0.15, dropout = 0.05, 
+			 batchsize = 32, sizeb1 = 3, sizeb2 = 3):
 	
 	# Initialize the model
 	printy("[INFO] compiling model...")
@@ -108,13 +114,13 @@ def trainCNN(args, IMAGE_DIMS = (48, 48, 1)):
 		height=IMAGE_DIMS[0],
 		depth=IMAGE_DIMS[2],
 		classes=len(lb.classes_),
-		n = args.sizeblock1,
-		m = args.sizeblock2,
-		l2rate = args.l2regrate,
-		dropout_rate = args.dropout
+		n = sizeb1,
+		m = sizeb2,
+		l2rate = l2r,
+		dropout_rate = dropout
 	)
 	# Optimizer
-	opt = Adam(lr=args.alpha, decay=args.alpha / args.epochs)
+	opt = Adam(lr = alpha, decay = alpha/epochs)
 	
 	# Compile the model
 	model.compile(loss="categorical_crossentropy", optimizer=opt, metrics=["accuracy"])
@@ -122,16 +128,17 @@ def trainCNN(args, IMAGE_DIMS = (48, 48, 1)):
 	# Train the network
 	printy("[INFO] training network...")
 	H = model.fit_generator(
-		aug.flow(trainX, trainY, batch_size=args.batchsize),
+		aug.flow(trainX, trainY, batch_size = batchsize),
 		validation_data=(testX, testY),
-		steps_per_epoch=len(trainX) // args.batchsize,
-		epochs=args.epochs,
+		steps_per_epoch = len(trainX)//batchsize,
+		epochs = epochs,
 		verbose=1
 	)
 	
 	# Save obtained model with it's labels and loss/acurracy plot
 	printy("[INFO] saving obtained model and results...")
-	save_results_to_disk(model, lb, H, args)
+	save_results_to_disk(model, lb, H, epochs, alpha, l2r, dropout,
+						 batchsize, sizeb1, sizeb2)
 	printg('Model succesfully trained!')
 	
 #=========================================================================#
@@ -139,4 +146,10 @@ def trainCNN(args, IMAGE_DIMS = (48, 48, 1)):
 #=========================================================================#
 	
 if __name__ == '__main__':
-	trainCNN(args)
+	
+	trainX, testX, trainY, testY, aug, lb = load_dataset()
+	trainCNN(trainX, testX, trainY, testY, aug, lb,
+			 epochs = args.epochs, alpha = args.alpha, l2r = args.l2regrate,
+			 dropout = args.dropout, batchsize = args.batchsize,
+			 sizeb1 = args.sizeblock1, sizeb2 = args.sizeblock2)
+	
